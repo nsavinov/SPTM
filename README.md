@@ -36,7 +36,7 @@ source ~/.profile
 # now anaconda is assumed to be in ~/anaconda2
 
 # create conda environment named sptm and install all dependencies into it
-git clone -b 2018_iclr_release --single-branch https://github.com/nsavinov/mapping.git
+git clone https://github.com/nsavinov/SPTM.git
 cd mapping
 ./setup.sh
 
