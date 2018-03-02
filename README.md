@@ -1,5 +1,5 @@
 ## Semi-parametric topological memory for navigation ##
-#### In ICLR 2018 [[Project Website]](https://sites.google.com/view/sptm/) [[Demo Video]](https://www.youtube.com/watch?v=0Q2B27jC7mE)
+#### In ICLR 2018 [[Project Website]](https://sites.google.com/view/sptm/) [[Demo Video]](https://youtu.be/vRF7f4lhswo)
 
 [Nikolay Savinov¹](http://people.inf.ethz.ch/nsavinov/), [Alexey Dosovitskiy²](https://dosovits.github.io/), [Vladlen Koltun²](http://vladlen.info/)<br/>
 ¹ETH Zurich, ²Intel Labs<br/>
