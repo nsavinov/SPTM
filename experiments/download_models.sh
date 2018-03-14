@@ -3,6 +3,6 @@ for dir in $DIR_LIST
 do
   mkdir $dir
   mkdir $dir/models
-  wget https://github.com/nsavinov/SPTM_data/raw/master/$dir/models/action_model_weights.h5
-  mv action_model_weights.h5 $dir/models
+  wget https://github.com/nsavinov/SPTM_data/raw/master/$dir/models/model_weights.h5
+  mv model_weights.h5 $dir/models
 done
