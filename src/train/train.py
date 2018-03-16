@@ -46,6 +46,11 @@ def edge_future_selector(current_first, actions):
         current_second = current_second_after
   return current_second, y, second + 1
 
+def shuffle_two_lists(first, second):
+  both = zip(first, second)
+  random.shuffle(both)
+  return zip(*both)
+
 def data_generator(future_selector, state_encoding_frames, num_classes):
   game = doom_navigation_setup(DEFAULT_RANDOM_SEED, TRAIN_WAD)
   while True:
@@ -63,16 +68,11 @@ def data_generator(future_selector, state_encoding_frames, num_classes):
         game_make_action_wrapper(game, ACTIONS_LIST[action_index], TRAIN_REPEAT)
         x.append(current_x)
         actions.append(action_index)
-      first_second_label = []
-      current_first = 0
+      first = 0
       while True:
-        current_second, y, new_current_first = future_selector(current_first, actions)
-        if current_second is None:
+        second, y, new_first = future_selector(first, actions)
+        if second is None:
           break
-        first_second_label.append((current_first, current_second, y))
-        current_first = new_current_first
-      random.shuffle(first_second_label)
-      for first, second, y in first_second_label:
         future_x = x[second]
         current_x = x[first]
         current_y = y
@@ -85,6 +85,8 @@ def data_generator(future_selector, state_encoding_frames, num_classes):
         elif state_encoding_frames == EDGE_STATE_ENCODING_FRAMES:
           x_result.append(np.concatenate((current_x, future_x), axis=2))
         y_result.append(current_y)
+        first = new_first
+    x_result, y_result = shuffle_two_lists(x_result, y_result)
     number_of_batches = len(x_result) / BATCH_SIZE
     for batch_index in xrange(number_of_batches):
       from_index = batch_index * BATCH_SIZE
