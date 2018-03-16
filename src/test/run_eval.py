@@ -44,6 +44,7 @@ def make_command(method, doom_env, param_string='', exp_out_folder_prefix='eval'
         assert (not os.path.exists(exp_folder)), "Experiment folder {} already exists".format(exp_folder)
     if not os.path.exists(exp_folder):
         os.makedirs(exp_folder)
+        os.makedirs(os.path.join(exp_folder, 'evaluation/graph_shortcuts'))
     param_command = make_params_command(param)
     eval_command =  make_eval_command(method, doom_env)
     graph_command = make_graph_command(method, doom_env)

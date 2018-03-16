@@ -86,7 +86,7 @@ class InputProcessor:
         list_to_predict.append(x)
       self.tensor_to_predict = np.array(list_to_predict)
     else:
-      memory_codes = self.bottom_network.predict(preprocess_images(np.array(keyframes)))
+      memory_codes = self.bottom_network.predict(np.array(keyframes))
       list_to_predict = []
       for index in xrange(len(keyframes)):
         x = np.concatenate((memory_codes[0], memory_codes[index]), axis=0)
@@ -97,7 +97,7 @@ class InputProcessor:
     keyframe = self.preprocess_input(keyframe)
     if EDGE_NETWORK == PIXEL_COMPARISON_NETWORK:
       keyframe = self.prepare_for_pixel_comparison(keyframe)
-    expanded_keyframe = np.expand_dims(preprocess_images(keyframe), axis=0)
+    expanded_keyframe = np.expand_dims(keyframe, axis=0)
     if not self.siamese:
       x = np.concatenate((expanded_keyframe, expanded_keyframe), axis=3)
     else:
@@ -112,10 +112,10 @@ class InputProcessor:
     if not self.siamese:
       for index in xrange(self.tensor_to_predict.shape[0]):
         self.tensor_to_predict[index][:, :, :(input.shape[2])] = input
-      probabilities = self.edge_model.predict(preprocess_images(self.tensor_to_predict),
+      probabilities = self.edge_model.predict(self.tensor_to_predict,
                                               batch_size=TESTING_BATCH_SIZE)
     else:
-      input_code = np.squeeze(self.bottom_network.predict(np.expand_dims(preprocess_images(input), axis=0), batch_size=1))
+      input_code = np.squeeze(self.bottom_network.predict(np.expand_dims(input, axis=0), batch_size=1))
       for index in xrange(self.tensor_to_predict.shape[0]):
         self.tensor_to_predict[index][0:(input_code.shape[0])] = input_code
       probabilities = self.top_network.predict(self.tensor_to_predict,

@@ -161,7 +161,7 @@ class Navigator:
       x = np.expand_dims(np.concatenate((first_arg,
                                          second_arg,
                                          third_arg), axis=2), axis=0)
-      action_probabilities = np.squeeze(self.action_model.predict(preprocess_images(x),
+      action_probabilities = np.squeeze(self.action_model.predict(x,
                                                                   batch_size=1))
       action_index = np.random.choice(len(ACTIONS_LIST), p=action_probabilities)
       action = ACTIONS_LIST[action_index]
