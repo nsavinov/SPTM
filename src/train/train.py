@@ -44,8 +44,7 @@ def edge_future_selector(current_first, actions):
         current_second = current_second_before
       else:
         current_second = current_second_after
-  new_current_first = second + 1
-  return current_second, y, new_current_first
+  return current_second, y, second + 1
 
 def data_generator(future_selector, state_encoding_frames, num_classes):
   game = doom_navigation_setup(DEFAULT_RANDOM_SEED, TRAIN_WAD)
