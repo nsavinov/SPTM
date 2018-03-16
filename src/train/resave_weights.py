@@ -1,6 +1,4 @@
-import sys
-sys.path.append('..')
-from common import *
+from train_setup import *
 
 if __name__ == '__main__':
   if sys.argv[1] == 'action':

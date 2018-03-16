@@ -1,7 +1,6 @@
 import sys
 sys.path.append('..')
 from common import *
-
 from vizdoom import *
 import cv2
 import numpy as np

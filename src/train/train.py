@@ -1,6 +1,4 @@
-import sys
-sys.path.append('..')
-from common import *
+from train_setup import *
 
 def setup_training_paths(experiment_id):
   experiment_path = EXPERIMENTS_PATH_TEMPLATE % experiment_id

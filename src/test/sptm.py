@@ -1,4 +1,4 @@
-from test_action_setup import *
+from test_setup import *
 import os.path
 
 from numpy import mean
