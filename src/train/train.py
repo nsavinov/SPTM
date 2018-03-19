@@ -46,11 +46,6 @@ def edge_future_selector(current_first, actions):
         current_second = current_second_after
   return current_second, y, second + 1
 
-def shuffle_two_lists(first, second):
-  both = zip(first, second)
-  random.shuffle(both)
-  return zip(*both)
-
 def data_generator(future_selector, state_encoding_frames, num_classes):
   game = doom_navigation_setup(DEFAULT_RANDOM_SEED, TRAIN_WAD)
   while True:
@@ -86,14 +81,17 @@ def data_generator(future_selector, state_encoding_frames, num_classes):
           x_result.append(np.concatenate((current_x, future_x), axis=2))
         y_result.append(current_y)
         first = new_first
-    x_result, y_result = shuffle_two_lists(x_result, y_result)
-    number_of_batches = len(x_result) / BATCH_SIZE
+    x_result = np.array(x_result)
+    y_result = np.array(y_result)
+    perm = np.random.permutation(x_result.shape[0])
+    x_result = x_result[perm, ...]
+    y_result = keras.utils.to_categorical(y_result[perm, ...], num_classes=num_classes)
+    number_of_batches = x_result.shape[0] / BATCH_SIZE
     for batch_index in xrange(number_of_batches):
       from_index = batch_index * BATCH_SIZE
       to_index = (batch_index + 1) * BATCH_SIZE
-      yield (np.array(x_result[from_index:to_index]),
-             keras.utils.to_categorical(np.array(y_result[from_index:to_index]),
-                                        num_classes=num_classes))
+      yield (x_result[from_index:to_index, ...],
+             y_result[from_index:to_index, ...])
 
 def train_main(mode):
   logs_path, last_model_path, current_model_path = setup_training_paths(EXPERIMENT_OUTPUT_FOLDER)
