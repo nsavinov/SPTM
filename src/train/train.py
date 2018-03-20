@@ -11,39 +11,53 @@ def setup_training_paths(experiment_id):
   os.makedirs(models_path)
   return logs_path, current_model_path
 
-def action_future_selector(current_first, actions):
-  second = current_first + random.randint(1, MAX_ACTION_DISTANCE)
-  if second >= MAX_CONTINUOUS_PLAY:
+def action_future_selector(current, actions):
+  future = current + random.randint(1, MAX_ACTION_DISTANCE)
+  if future >= MAX_CONTINUOUS_PLAY:
     return None, None, None
-  return second, actions[current_first], second + 1
+  return future, actions[current], future + 1
 
-def edge_future_selector(current_first, actions):
-  second = current_first + random.randint(1, MAX_ACTION_DISTANCE)
-  if second >= MAX_CONTINUOUS_PLAY:
+def edge_future_selector(current, actions):
+  ahead = current + random.randint(1, MAX_ACTION_DISTANCE)
+  if ahead >= MAX_CONTINUOUS_PLAY:
     return None, None, None
   if random.random() < 0.5:
     y = 1
-    current_second = second
+    future = ahead
   else:
     y = 0
-    current_second_before = None
-    current_second_after = None
-    index_before_max = current_first - NEGATIVE_SAMPLE_MULTIPLIER * MAX_ACTION_DISTANCE
-    index_after_min = current_first + NEGATIVE_SAMPLE_MULTIPLIER * MAX_ACTION_DISTANCE
+    before = None
+    after = None
+    index_before_max = current - NEGATIVE_SAMPLE_MULTIPLIER * MAX_ACTION_DISTANCE
+    index_after_min = current + NEGATIVE_SAMPLE_MULTIPLIER * MAX_ACTION_DISTANCE
     if index_before_max >= 0:
-      current_second_before = random.randint(0, index_before_max)
+      before = random.randint(0, index_before_max)
     if index_after_min < MAX_CONTINUOUS_PLAY:
-      current_second_after = random.randint(index_after_min, MAX_CONTINUOUS_PLAY - 1)
-    if current_second_before is None:
-      current_second = current_second_after
-    elif current_second_after is None:
-      current_second = current_second_before
+      after = random.randint(index_after_min, MAX_CONTINUOUS_PLAY - 1)
+    if before is None:
+      future = after
+    elif after is None:
+      future = before
     else:
       if random.random() < 0.5:
-        current_second = current_second_before
+        future = before
       else:
-        current_second = current_second_after
-  return current_second, y, second + 1
+        future = after
+  return future, y, ahead + 1
+
+def get_state_encoding(frames, current, future, state_encoding_frames):
+  future_frame = frames[future]
+  current_frame = frames[current]
+  if state_encoding_frames == 2:
+    if current > 0:
+      previous_frame = frames[current - 1]
+    else:
+      previous_frame = current_frame
+    return np.concatenate((previous_frame, current_frame, future_frame), axis=2)
+  elif state_encoding_frames == 1:
+    return np.concatenate((current_frame, future_frame), axis=2)
+  else:
+    raise Exception('Not implemented!')
 
 def data_generator(future_selector, state_encoding_frames, num_classes):
   game = doom_navigation_setup(DEFAULT_RANDOM_SEED, TRAIN_WAD)
@@ -54,32 +68,22 @@ def data_generator(future_selector, state_encoding_frames, num_classes):
       game.set_doom_map(MAP_NAME_TEMPLATE % random.randint(MIN_RANDOM_TEXTURE_MAP_INDEX,
                                                            MAX_RANDOM_TEXTURE_MAP_INDEX))
       game.new_episode()
-      x = []
+      frames = []
       actions = []
       for _ in xrange(MAX_CONTINUOUS_PLAY):
-        current_x = game.get_state().screen_buffer.transpose(VIZDOOM_TO_TF)
+        frame = game.get_state().screen_buffer.transpose(VIZDOOM_TO_TF)
         action_index = random.randint(0, ACTION_CLASSES - 1)
         game_make_action_wrapper(game, ACTIONS_LIST[action_index], TRAIN_REPEAT)
-        x.append(current_x)
+        frames.append(frame)
         actions.append(action_index)
-      first = 0
+      current = 0
       while True:
-        second, y, new_first = future_selector(first, actions)
-        if second is None:
+        future, y, new_current = future_selector(current, actions)
+        if future is None:
           break
-        future_x = x[second]
-        current_x = x[first]
-        current_y = y
-        if state_encoding_frames == ACTION_STATE_ENCODING_FRAMES:
-          if first > 0:
-            previous_x = x[first - 1]
-          else:
-            previous_x = current_x
-          x_result.append(np.concatenate((previous_x, current_x, future_x), axis=2))
-        elif state_encoding_frames == EDGE_STATE_ENCODING_FRAMES:
-          x_result.append(np.concatenate((current_x, future_x), axis=2))
-        y_result.append(current_y)
-        first = new_first
+        x_result.append(get_state_encoding(frames, current, future, state_encoding_frames))
+        y_result.append(y)
+        current = new_current
     x_result = np.array(x_result)
     y_result = np.array(y_result)
     perm = np.random.permutation(x_result.shape[0])
