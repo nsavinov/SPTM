@@ -4,13 +4,12 @@ def setup_training_paths(experiment_id):
   experiment_path = EXPERIMENTS_PATH_TEMPLATE % experiment_id
   logs_path = LOGS_PATH_TEMPLATE % experiment_id
   models_path = MODELS_PATH_TEMPLATE % experiment_id
-  last_model_path = LAST_MODEL_PATH_TEMPLATE % experiment_id
   current_model_path = CURRENT_MODEL_PATH_TEMPLATE % experiment_id
   assert (not os.path.exists(experiment_path)), 'Experiment folder %s already exists' % experiment_path
   os.makedirs(experiment_path)
   os.makedirs(logs_path)
   os.makedirs(models_path)
-  return logs_path, last_model_path, current_model_path
+  return logs_path, current_model_path
 
 def action_future_selector(current_first, actions):
   second = current_first + random.randint(1, MAX_ACTION_DISTANCE)
@@ -94,7 +93,7 @@ def data_generator(future_selector, state_encoding_frames, num_classes):
              y_result[from_index:to_index, ...])
 
 def train_main(mode):
-  logs_path, last_model_path, current_model_path = setup_training_paths(EXPERIMENT_OUTPUT_FOLDER)
+  logs_path, current_model_path = setup_training_paths(EXPERIMENT_OUTPUT_FOLDER)
   if mode == 'action':
     num_classes = ACTION_CLASSES
     state_encoding_frames = ACTION_STATE_ENCODING_FRAMES
@@ -110,9 +109,7 @@ def train_main(mode):
   model = network(((1 + state_encoding_frames) * NET_CHANNELS, NET_HEIGHT, NET_WIDTH), num_classes)
   adam = keras.optimizers.Adam(lr=LEARNING_RATE, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
   model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
-  callbacks_list = [keras.callbacks.TensorBoard(log_dir=logs_path, write_graph=True),
-                    keras.callbacks.ModelCheckpoint(last_model_path,
-                                                    period=LAST_MODEL_CHECKPOINT_PERIOD),
+  callbacks_list = [keras.callbacks.TensorBoard(log_dir=logs_path, write_graph=False),
                     keras.callbacks.ModelCheckpoint(current_model_path,
                                                     period=MODEL_CHECKPOINT_PERIOD)]
   model.fit_generator(data_generator(future_selector, state_encoding_frames, num_classes),
@@ -122,4 +119,3 @@ def train_main(mode):
 
 if __name__ == '__main__':
   train_main(sys.argv[1])
-
