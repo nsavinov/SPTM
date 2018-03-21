@@ -11,6 +11,19 @@ def setup_training_paths(experiment_id):
   os.makedirs(models_path)
   return logs_path, current_model_path
 
+def from_list_generator(x_result, y_result, num_classes):
+  x_result = np.array(x_result)
+  y_result = np.array(y_result)
+  perm = np.random.permutation(x_result.shape[0])
+  x_result = x_result[perm, ...]
+  y_result = keras.utils.to_categorical(y_result[perm, ...], num_classes=num_classes)
+  number_of_batches = x_result.shape[0] / BATCH_SIZE
+  for batch_index in xrange(number_of_batches):
+    from_index = batch_index * BATCH_SIZE
+    to_index = (batch_index + 1) * BATCH_SIZE
+    yield (x_result[from_index:to_index, ...],
+           y_result[from_index:to_index, ...])
+
 def action_future_selector(current, actions):
   future = current + random.randint(1, MAX_ACTION_DISTANCE)
   if future >= MAX_CONTINUOUS_PLAY:
@@ -59,12 +72,17 @@ def get_state_encoding(frames, current, future, state_encoding_frames):
   else:
     raise Exception('Not implemented!')
 
-def data_generator(future_selector, state_encoding_frames, num_classes):
+def make_random_action(game):
+  action_index = random.randint(0, ACTION_CLASSES - 1)
+  game_make_action_wrapper(game, ACTIONS_LIST[action_index], TRAIN_REPEAT)
+  return action_index
+
+def data_generator(future_selector, state_encoding_frames, num_classes, number_of_episodes):
   game = doom_navigation_setup(DEFAULT_RANDOM_SEED, TRAIN_WAD)
   while True:
     x_result = []
     y_result = []
-    for episode in xrange(NUMBER_OF_EPISODES):
+    for _ in xrange(number_of_episodes):
       game.set_doom_map(MAP_NAME_TEMPLATE % random.randint(MIN_RANDOM_TEXTURE_MAP_INDEX,
                                                            MAX_RANDOM_TEXTURE_MAP_INDEX))
       game.new_episode()
@@ -72,8 +90,7 @@ def data_generator(future_selector, state_encoding_frames, num_classes):
       actions = []
       for _ in xrange(MAX_CONTINUOUS_PLAY):
         frame = game.get_state().screen_buffer.transpose(VIZDOOM_TO_TF)
-        action_index = random.randint(0, ACTION_CLASSES - 1)
-        game_make_action_wrapper(game, ACTIONS_LIST[action_index], TRAIN_REPEAT)
+        action_index = make_random_action(game)
         frames.append(frame)
         actions.append(action_index)
       current = 0
@@ -84,17 +101,8 @@ def data_generator(future_selector, state_encoding_frames, num_classes):
         x_result.append(get_state_encoding(frames, current, future, state_encoding_frames))
         y_result.append(y)
         current = new_current
-    x_result = np.array(x_result)
-    y_result = np.array(y_result)
-    perm = np.random.permutation(x_result.shape[0])
-    x_result = x_result[perm, ...]
-    y_result = keras.utils.to_categorical(y_result[perm, ...], num_classes=num_classes)
-    number_of_batches = x_result.shape[0] / BATCH_SIZE
-    for batch_index in xrange(number_of_batches):
-      from_index = batch_index * BATCH_SIZE
-      to_index = (batch_index + 1) * BATCH_SIZE
-      yield (x_result[from_index:to_index, ...],
-             y_result[from_index:to_index, ...])
+    for pair in from_list_generator(x_result, y_result, num_classes):
+      yield pair
 
 def train_main(mode):
   logs_path, current_model_path = setup_training_paths(EXPERIMENT_OUTPUT_FOLDER)
@@ -103,11 +111,15 @@ def train_main(mode):
     state_encoding_frames = ACTION_STATE_ENCODING_FRAMES
     network = ACTION_NETWORK
     future_selector = action_future_selector
+    number_of_episodes = ACTION_EPISODES
+    max_epochs = ACTION_MAX_EPOCHS
   elif mode == 'edge':
     num_classes = EDGE_CLASSES
     state_encoding_frames = EDGE_STATE_ENCODING_FRAMES
     network = EDGE_NETWORK
     future_selector = edge_future_selector
+    number_of_episodes = EDGE_EPISODES
+    max_epochs = EDGE_MAX_EPOCHS
   else:
     raise Exception('Unknown mode!')
   model = network(((1 + state_encoding_frames) * NET_CHANNELS, NET_HEIGHT, NET_WIDTH), num_classes)
@@ -116,9 +128,9 @@ def train_main(mode):
   callbacks_list = [keras.callbacks.TensorBoard(log_dir=logs_path, write_graph=False),
                     keras.callbacks.ModelCheckpoint(current_model_path,
                                                     period=MODEL_CHECKPOINT_PERIOD)]
-  model.fit_generator(data_generator(future_selector, state_encoding_frames, num_classes),
+  model.fit_generator(data_generator(future_selector, state_encoding_frames, num_classes, number_of_episodes),
                       steps_per_epoch=DUMP_AFTER_BATCHES,
-                      epochs=MAX_EPOCHS,
+                      epochs=max_epochs,
                       callbacks=callbacks_list)
 
 if __name__ == '__main__':
