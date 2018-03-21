@@ -37,7 +37,7 @@ source ~/.profile
 
 # create conda environment named sptm and install all dependencies into it
 git clone https://github.com/nsavinov/SPTM.git
-cd mapping
+cd SPTM
 ./setup.sh
 
 # download models
