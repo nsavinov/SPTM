@@ -8,7 +8,7 @@
   <img src="misc/sptm.gif" width="480">
 </p>
 
-This is Tensorflow/Keras implementation of our [ICLR 2018 paper on semi-parametric topological memory for navigation](https://openreview.net/pdf?id=SygwwGbRW).
+This is Tensorflow/Keras implementation of our [ICLR 2018 paper on semi-parametric topological memory for navigation](https://arxiv.org/abs/1803.00653).
 If you use this work, please cite:
 
     @inproceedings{SavinovDosovitskiyKoltun2018_SPTM,
