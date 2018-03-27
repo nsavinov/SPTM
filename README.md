@@ -107,10 +107,22 @@ Val-3 deepmind_large
 We also used suffix '_dm' for homogenious textures experiments and '_autoexplore' for automatic exploration experiments (see the paper supplementary).
 
 ### Training
-Coming soon! (by March 25)
+```python
+# train models: both R and L networks
+# R-network is called 'edge' and L-network is called 'action' throughout the code
+cd src/train
+nohup bash demo_train.sh &
+# in case you need to re-run demo_train.sh, run the clean-up script first
+# we require the experiment folder to be unique, so the script below will remove the results from the previous run
+bash cleanup_demo_train.sh
+# test newly trained models
+cd ../test
+nohup bash demo_test.sh "ACTION_EXPERIMENT_ID demo_L EDGE_EXPERIMENT_ID demo_R" &
+```
+While training, you can track the progress via tensorboard logs in ../../experiments/demo_L/logs and ../../experiments/demo_R/logs. The training takes a week and requires approximately 16Gb of RAM. The trained model results are slightly different from those for our pre-trained models.
 
 ### Map generation
-Coming soon (by early April)
+Coming soon!
 
 ### Acknowledgements
 We would like to thank Anastasia Savinova for helping with the demo video.
