@@ -148,7 +148,7 @@ python apply_random_textures.py --input ../../data/Train-DM/D3_battle_navigation
 # test
 # normal mazes
 python apply_random_textures.py --input ../../data/Val/deepmind_large/deepmind_large.wad --texture-sparsity dense --mode test
-# after running script above, some manual interaction is still needed to move the starting point
+# after running script above, move the starting points manually
 # homogenious textures mazes
 python apply_random_textures.py --input ../../data/Val/deepmind_large_dm/deepmind_large.wad --texture-sparsity sparse --mode test
 # after running script above, move the starting points manually
