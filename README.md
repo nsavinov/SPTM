@@ -119,7 +119,7 @@ bash cleanup_demo_train.sh
 cd ../test
 nohup bash demo_test.sh "ACTION_EXPERIMENT_ID demo_L EDGE_EXPERIMENT_ID demo_R" &
 ```
-While training, you can track the progress via tensorboard logs in ../../experiments/demo_L/logs and ../../experiments/demo_R/logs. The training takes a week and requires approximately 16Gb of RAM. The trained model results are slightly different from those for our pre-trained models.
+While training, you can track the progress via tensorboard logs in ../../experiments/demo_L/logs and ../../experiments/demo_R/logs. The training takes a week and requires approximately 10Gb of RAM.
 
 ### Map generation
 Coming soon!
