@@ -136,7 +136,8 @@ cd src/test
 nohup bash demo_test_dm.sh "ACTION_EXPERIMENT_ID demo_L EDGE_EXPERIMENT_ID demo_R" &
 ```
 
-### Map generation
+### Maze generation
+The code below creates mazes with the same distribution of textures as those in the paper:
 ```Shell
 cd src/data_generation
 # training
