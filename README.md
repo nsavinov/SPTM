@@ -37,7 +37,7 @@ source ~/.profile
 
 # create conda environment named sptm and install all dependencies into it
 git clone https://github.com/nsavinov/SPTM.git
-cd mapping
+cd SPTM
 ./setup.sh
 
 # download models
@@ -50,22 +50,22 @@ The scripts below produce navigation videos, trajectories, success rate plots an
 source activate sptm
 cd src/test
 # test downloaded models on all environments 
-nohup bash demo.sh &
-# in case you need to re-run demo.sh, run the clean-up script first
+nohup bash demo_test.sh &
+# in case you need to re-run demo_test.sh, run the clean-up script first
 # we require the experiment folder to be unique, so the script below will remove the results from the previous run
-bash cleanup_demo.sh
+bash cleanup_demo_test.sh
 ```
 ### Demo results progress tracking and interpretation
-The following steps happen when you run demo.sh:
-* A memory graph is computed and saved. A log is written into ../../experiments/demo*/graph_shortcuts.out . The graph is visualized in ../../experiments/demo*/evaluation/*_graph.pdf . The blue lines are temporal edges and the red lines are visual shortcut edges.
-* A navigation test is run. A log is written into ../../experiments/demo*/log.out , other output data is written into ../../experiments/demo*/evaluation/* . The test consists of many sub-tests, one for every maze/starting point/goal/random seed. For every sub-test, we produce a navigation video and a navigation track of the agent. Their naming is given by a suffix _TRIAL'INDEX_STARTING'POINT'INDEX_GOAL'NAME.mov[.pdf].
+The following steps happen when you run demo_test.sh:
+* A memory graph is computed and saved. A log is written into ../../experiments/demo_test*/graph_shortcuts.out . The graph is visualized in ../../experiments/demo_test*/evaluation/*_graph.pdf . The blue lines are temporal edges and the red lines are visual shortcut edges.
+* A navigation test is run. A log is written into ../../experiments/demo_test*/log.out , other output data is written into ../../experiments/demo_test*/evaluation/* . The test consists of many sub-tests, one for every maze/starting point/goal/random seed. For every sub-test, we produce a navigation video and a navigation track of the agent. Their naming is given by a suffix _TRIAL'INDEX_STARTING'POINT'INDEX_GOAL'NAME.mov[.pdf].
 * Plots similar to Figure 5 in the paper are produced from the log file and saved in the current directory as pdf-files named after test environments (one plot for each environment). The x-axis is the time limit to reach the goal (measured in VizDoom simulator steps) and the y-axis is the success rate of the agent for this time limit (the higher the better, measured in percents).
 * Metrics success@5000 (used for Table 1 in the paper) are computed and saved to table_results.txt in the current directory.
 
 ### Changing SPTM hyperparameters for demo
 You can try out non-default memory parameters for the demo by
 ```Shell
-nohup bash demo.sh "PARAMETER_NAME_1 PARAMETER_VALUE_1 ... PARAMETER_NAME_N PARAMETER_VALUE_N" &
+nohup bash demo_test.sh "PARAMETER_NAME_1 PARAMETER_VALUE_1 ... PARAMETER_NAME_N PARAMETER_VALUE_N" &
 ```
 All parameters are described below in the format "PARAMETER_NAME DEFAULT_PARAMETER_VALUE", their relation to the paper is also explained:
 ```python
@@ -107,10 +107,22 @@ Val-3 deepmind_large
 We also used suffix '_dm' for homogenious textures experiments and '_autoexplore' for automatic exploration experiments (see the paper supplementary).
 
 ### Training
-Coming soon! (by mid-March)
+```python
+# train models: both R and L networks
+# R-network is called 'edge' and L-network is called 'action' throughout the code
+cd src/train
+nohup bash demo_train.sh &
+# in case you need to re-run demo_train.sh, run the clean-up script first
+# we require the experiment folder to be unique, so the script below will remove the results from the previous run
+bash cleanup_demo_train.sh
+# test newly trained models
+cd ../test
+nohup bash demo_test.sh "ACTION_EXPERIMENT_ID demo_L EDGE_EXPERIMENT_ID demo_R" &
+```
+While training, you can track the progress via tensorboard logs in ../../experiments/demo_L/logs and ../../experiments/demo_R/logs. The training takes a week and requires approximately 16Gb of RAM. The trained model results are slightly different from those for our pre-trained models.
 
 ### Map generation
-Coming soon (by mid-March)
+Coming soon!
 
 ### Acknowledgements
 We would like to thank Anastasia Savinova for helping with the demo video.
