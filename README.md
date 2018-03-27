@@ -107,7 +107,7 @@ Val-3 deepmind_large
 We also used suffix '_dm' for homogenious textures experiments and '_autoexplore' for automatic exploration experiments (see the paper supplementary).
 
 ### Training
-```python
+```Shell
 # train models: both R and L networks
 # R-network is called 'edge' and L-network is called 'action' throughout the code
 cd src/train
@@ -122,7 +122,7 @@ nohup bash demo_test.sh "ACTION_EXPERIMENT_ID demo_L EDGE_EXPERIMENT_ID demo_R" 
 While training, you can track the progress via tensorboard logs in ../../experiments/demo_L/logs and ../../experiments/demo_R/logs. The training takes a week and requires approximately 10Gb of RAM.
 
 ### Supplementary experiments
-```python
+```Shell
 # test on automatic exploration mazes
 cd src/test
 nohup bash demo_test_autoexplore.sh &
@@ -137,7 +137,21 @@ nohup bash demo_test_dm.sh "ACTION_EXPERIMENT_ID demo_L EDGE_EXPERIMENT_ID demo_
 ```
 
 ### Map generation
-Coming soon!
+```Shell
+cd src/data_generation
+# training
+# normal mazes
+python apply_random_textures.py --input ../../data/Train/D3_battle_navigation_split.wad --texture-sparsity dense --mode train
+# homogenious textures mazes
+python apply_random_textures.py --input ../../data/Train-DM/D3_battle_navigation_split.wad --texture-sparsity sparse --mode train
+# test
+# normal mazes
+python apply_random_textures.py --input ../../data/Val/deepmind_large/deepmind_large.wad --texture-sparsity dense --mode test
+# after running script above, some manual interaction is still needed to move the starting point
+# homogenious textures mazes
+python apply_random_textures.py --input ../../data/Val/deepmind_large_dm/deepmind_large.wad --texture-sparsity sparse --mode test
+# after running script above, move the starting points manually
+```
 
 ### Acknowledgements
 We would like to thank Anastasia Savinova for helping with the demo video.
