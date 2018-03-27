@@ -121,6 +121,21 @@ nohup bash demo_test.sh "ACTION_EXPERIMENT_ID demo_L EDGE_EXPERIMENT_ID demo_R" 
 ```
 While training, you can track the progress via tensorboard logs in ../../experiments/demo_L/logs and ../../experiments/demo_R/logs. The training takes a week and requires approximately 10Gb of RAM.
 
+### Supplementary experiments
+```python
+# test on automatic exploration mazes
+cd src/test
+nohup bash demo_test_autoexplore.sh &
+# test pre-trained homogenious textures models on homogenious textures mazes
+nohup bash demo_test_dm.sh "ACTION_EXPERIMENT_ID 0104_L EDGE_EXPERIMENT_ID 0105_R" &
+# train new homogenious textures models
+cd src/train
+TRAIN_WAD_PATH=Train-DM/D3_battle_navigation_split.wad_manymaps_test.wad nohup bash demo_train.sh &
+# test newly trained homogenious textures models
+cd src/test
+nohup bash demo_test_dm.sh "ACTION_EXPERIMENT_ID demo_L EDGE_EXPERIMENT_ID demo_R" &
+```
+
 ### Map generation
 Coming soon!
 
