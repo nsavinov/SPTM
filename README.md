@@ -155,7 +155,7 @@ python apply_random_textures.py --input ../../data/Val/deepmind_large_dm/deepmin
 ```
 
 ### Related projects
-Check out the code for [Episodic Curiosity](https://github.com/google-research/episodic-curiosity), which addresses the exploration problem using episodic memory and R-network (complementary to the exploitation policy in this work which relies on a short exploration video).
+Check out the code for [Episodic Curiosity](https://github.com/google-research/episodic-curiosity), which addresses the exploration problem using episodic memory and R-network (could be used as a source of exploration video for SPTM).
 
 ### Acknowledgements
 We would like to thank Anastasia Savinova for helping with the demo video.
